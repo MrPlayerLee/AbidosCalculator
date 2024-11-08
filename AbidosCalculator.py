@@ -1,6 +1,8 @@
 # import module
 import os
 import time
+import sys
+import datetime
 
 # Abidos Calculator
 
@@ -19,16 +21,27 @@ class AbidosCalc:
         self.need_uncommon = 45
         self.need_abidos = 33
         self.comm_unccom = 0
-        self.dustuse = 0
         self.sequnce_common = 0
         self.sequnce_uncommon = 0
         self.origin_common = 0
         self.origin_uncommon = 0
         self.origin_rare = 0
         self.origin_abidos = 0
-        self.oriposible_common = 0
-        self.oriposible_uncommon = 0
-        self.oriposible_abidos = 0
+        self.origin_dust = 0
+        self.rareToCommon = 0
+        self.probeComToDust1 = 0
+        self.probeComToDust1_ = 0
+        self.probeResultDust = 0
+        self.probeDust1 = 0
+        self.probeDust1_ = 0
+        self.probeDustToAbidos = 0
+        self.probeComToDust2 = 0
+        self.probeDust2 = 0
+        self.probeUncomToDust = 0
+        self.probeDust3 = 0
+        self.probeAbidos = 0
+        self.probeComm_Unccom = True
+        self.probeSeq = 0
     
     def timer(self, sec, string):
         print("\n\n\n")
@@ -48,6 +61,7 @@ class AbidosCalc:
             self.origin_uncommon = self.uncommon
             self.origin_rare = self.rare
             self.origin_abidos = self.abidos
+            self.origin_dust = self.dust
         except ValueError:
             print("숫자만 입력하십시오.")
         return
@@ -65,8 +79,9 @@ class AbidosCalc:
         print(f"생활가루: {self.dust} 개")
         return
 
-    def calc1(self): # 티어2 희귀 재료를 모두 생활가루로 변환 후 아비도스 재료로 변환
+    def calc1(self): # 티어2 희귀재료를 일반재료로 변환
         self.common = self.common + (self.rare // 5 * 50)
+        self.rareToCommon = self.rare // 5 * 50
         self.rare = self.rare % 5
         return
 
@@ -74,19 +89,27 @@ class AbidosCalc:
     def calc2(self): # 일반, 희귀 둘중 더 많은 부분을 생활가루로 변환.
         if self.posible_uncommon < self.posible_common: 
             print("일반재료가 더 많습니다. 생활가루로 변환합니다.")
+            self.probeComm_Unccom = True
             self.comm_unccom = (self.posible_common - self.posible_uncommon) * 86 // 100 * 80 #일반재료가 더 많을때
+            self.probeComToDust1 = (self.posible_common - self.posible_uncommon) * 86 // 100 #Probe
             self.dust = self.dust + self.comm_unccom
+            self.probeDust1 = self.dust #Probe
             self.common = self.common - (self.posible_common - self.posible_uncommon) * 86
         else:
             print("고급재료가 더 많습니다. 생활가루로 변환합니다.")
+            self.probeComm_Unccom = False
             self.comm_unccom = (self.posible_uncommon - self.posible_common ) * 45 // 50 * 80 #희귀재료가 더 많을때
+            self.probeComToDust1_ = (self.posible_uncommon - self.posible_common ) * 45 // 50 #Probe
             self.dust = self.dust + self.comm_unccom
+            self.probeDust1_ = self.dust #Probe
             self.uncommon = self.uncommon - (self.posible_uncommon - self.posible_common) * 45
         return
 
-    def calc3(self, string): # 생활 가루를 아비도스로 변환.
+    def calc3(self, string, calci): # 생활 가루를 아비도스로 변환.
         print(f"{string}")
         self.abidos += self.dust // 60 * 10
+        if calci == True:
+            self.probeDustToAbidos = self.abidos
         self.dust %= 60
         return
     
@@ -102,38 +125,55 @@ class AbidosCalc:
             if self.sequnce_common > 100:
                 self.sequnce_common - 100
                 self.dust += 80
+                self.probeComToDust2 += 1
             if self.sequnce_uncommon > 50:
                 self.sequnce_uncommon - 50
                 self.dust += 80
+                self.probeUncomToDust += 1
             if self.dust > 100:
-                self.calc3("실시간으로 모든 생활가루를 아비도스 재료로 변환중...")
+                self.calc3("실시간으로 모든 생활가루를 아비도스 재료로 변환중...", False)
+                self.probeAbidos += 1
             self.showData()
+            self.probeResultDust = self.dust
         return
     
-    def end(self):
+    def result(self):
+        self.probeDust2 = self.probeComToDust2 * 86
+        self.probeDust3 = self.probeUncomToDust * 45
+        #os.system("cls")
+        print("최종 결과:")
+        print(f"  아비도스 재료 : [{self.abidos}개]  >>  [{self.abidos//33}회분]")
+        print(f"  T2 희귀 재료 : [{self.rare}개]")
+        print(f"  고급 재료 : [{self.uncommon}개]  >>  [{self.uncommon//45}회분]")
+        print(f"  일반 재료 : [{self.common}개]  >>  [{self.common//86}회분]")
+        print(f"  생활가루 : [{self.probeResultDust}개]\n")
+        print("기존 보유량:")
+        print(f"  아비도스 재료 : [{self.origin_abidos}개]  >>  [{self.origin_abidos//33}회분]")
+        print(f"  T2 희귀 재료 : [{self.origin_rare}개]")
+        print(f"  고급 재료 : [{self.origin_uncommon}개]  >>  [{self.origin_uncommon//45}회분]")
+        print(f"  일반 재료 : [{self.origin_common}개]  >>  [{self.origin_common//86}회분]")
+        print(f"  생활가루 : [{self.origin_dust}개]\n")
+        print(f"교환 과정:")
+        print(f"  1. T2 희귀 재료를 모두 일반재료로 변환합니다. (생활가루로 변환하는게 아닙니다.)")
+        if self.probeComm_Unccom == True:
+            print(f"  2. 일반재료를 생활가루로 [{self.probeComToDust1}회] 교환합니다. (생활가루: {self.probeDust1}개)")
+        if self.probeComm_Unccom == False:
+            print(f"  2. 고급재료를 생활가루로 [{self.probeComToDust1_}회] 교환합니다. (생활가루: {self.probeDust1_}개)")
+        print(f"  3. 교환된 생활가루를 모두 아비도스 재료로 교환합니다. (아비도스: {self.probeDustToAbidos}개)")
+        print(f"  4. 일반재료를 생활가루로 [{self.probeComToDust2}회] 교환합니다. (생활가루: {self.probeDust2}개)")
+        print(f"  5. 고급재료를 생활가루로 [{self.probeUncomToDust}회] 교환합니다. (생활가루: {self.probeDust3}개)")
+        print(f"  6. 모든 생활가루를 아비도스 재료로 교환합니다. (아비도스: {self.probeAbidos*33}개)")
 
-        self.oriposible_common = self.origin_common // self.need_common
-        self.oriposible_uncommon = self.origin_uncommon // self.need_uncommon
-        self.oriposible_abidos = self.origin_abidos // self.need_abidos
 
-        print("\n\n원래 재료:")
-        print(f"일반재료 : {self.origin_common} (제작가능: {self.oriposible_common})")
-        print(f"고급재료 : {self.origin_uncommon} (제작가능: {self.oriposible_uncommon})")
-        print(f"희귀재료 : {self.origin_rare} (교환가능: {self.origin_rare // 5})")
-        print(f"아비도스 : {self.origin_abidos} (제작가능: {self.oriposible_abidos})")
 
-        self.oriposible_common = (self.origin_common + self.origin_rare // 5 * 50) // self.need_common
 
-        print("\n\n최종 결과:")
-        print("\n일반재료 : ")
-        print(f"< 원래재료 : {self.origin_common}개 > + < 변환된 희귀재료(T2) : {self.origin_rare // 5 * 50}개 >")
-        print(f"일반재료 최종 : \n{self.origin_common + self.origin_rare // 5 * 50}개 -> {self.common}개 (제작가능: {self.oriposible_common}회 -> {self.posible_common}회) [ {((self.origin_common + self.origin_rare // 5 * 50) - self.common) // 100}회 교환 ]\n")
-        print("고급재료 : ")
-        print(f"{self.origin_uncommon}개 -> {self.uncommon}개 (제작가능: {self.oriposible_uncommon}회 -> {self.posible_uncommon}회) [ {(self.origin_uncommon - self.uncommon) // 50}회 교환 ]\n")
-        print("아비도스 : ")
-        print(f"{self.origin_abidos}개 -> {self.abidos}개 (제작가능: {self.oriposible_abidos}회 -> {self.posible_abidos}회)\n")
 
 calc = AbidosCalc()
+current_date = datetime.datetime.now().strftime("%Y%m%d")
+file_name = f"CalculatorSave_{current_date}.txt"
+results_folder = "Results"
+file_path = os.path.join(results_folder, file_name)
+
 calc.inputData()
 
 
@@ -149,20 +189,28 @@ calc.showData()
 calc.timer(3, "다음 단계")
 
 os.system("cls")
-calc.calc3("모든 생활가루를 아비도스 재료로 변환합니다.")
+calc.calc3("모든 생활가루를 아비도스 재료로 변환합니다.", True)
 calc.showData()
 calc.timer(3, "다음 단계")
 
 os.system("cls")
 calc.calc4()
 
+if not os.path.exists(results_folder):
+    os.makedirs(results_folder)
+
 
 print("아비도스 변환 시뮬레이션 완료.")
 calc.timer(3, "정리 단계")
-
 os.system("cls")
-print("현재 보유중인 제작재료:")
-calc.showData()
-calc.end()
+calc.result()
+with open(file_path, 'w') as f:
+    original_stdout = sys.stdout
+    sys.stdout = f
 
+    calc.result()
+
+    sys.stdout = original_stdout
+print(f"\n\n결과가 'Result\{file_name}'에 저장되었습니다.")
+print("아무키를 입력하여 종료할 수 있습니다.")
 os.system("pause>nul")
