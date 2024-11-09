@@ -2,7 +2,7 @@ import requests
 import os
 
 # 다운로드 URL
-DOWNLOAD_URL = "https://gitfront.io/r/Albis/bkZfvNyrW2Wu/AbidosCalculator/raw/Release/AbidosCalculator.exe"
+DOWNLOAD_URL = "https://raw.githubusercontent.com/MrPlayerLee/AbidosCalculator/main/Release/AbidosCalculator.exe"
 
 def download_and_update():
     try:
