@@ -95,7 +95,8 @@ class AbidosCalc:
             self.probeComToDust1 = (self.posible_common - self.posible_uncommon) * 86 // 100 #Probe
             self.dust = self.dust + self.comm_unccom
             self.probeDust1 = self.dust #Probe
-            self.common = self.common - (self.posible_common - self.posible_uncommon) * 86
+            self.common -= (self.posible_common - self.posible_uncommon) * 86
+            self.common += (self.posible_common - self.posible_uncommon) * 86 % 100
         else:
             print("고급재료가 더 많습니다. 생활가루로 변환합니다.")
             self.probeComm_Unccom = False
@@ -103,7 +104,8 @@ class AbidosCalc:
             self.probeComToDust1_ = (self.posible_uncommon - self.posible_common ) * 45 // 50 #Probe
             self.dust = self.dust + self.comm_unccom
             self.probeDust1_ = self.dust #Probe
-            self.uncommon = self.uncommon - (self.posible_uncommon - self.posible_common) * 45
+            self.uncommon -= (self.posible_uncommon - self.posible_common) * 45
+            self.uncommon += (self.posible_uncommon - self.posible_common) * 45 % 50
         return
 
     def calc3(self, string, calci): # 생활 가루를 아비도스로 변환.
