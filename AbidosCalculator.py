@@ -42,6 +42,7 @@ class AbidosCalc:
         self.probeAbidos = 0
         self.probeComm_Unccom = True
         self.probeSeq = 0
+        self.calcIntegrity = True
     
     def timer(self, sec, string):
         print("\n\n\n")
@@ -106,37 +107,47 @@ class AbidosCalc:
         return
 
     def calc3(self, string, calci): # 생활 가루를 아비도스로 변환.
-        print(f"{string}")
-        self.abidos += self.dust // 60 * 10
+        if string != None:
+            print(f"{string}")
+        self.abidos += self.dust // 100 * 10
         if calci == True:
             self.probeDustToAbidos = self.abidos
-        self.dust %= 60
+        self.dust %= 100
         return
     
     def calc4(self): # 각 제작재료의 가능횟수를 순차적으로 1씩 삭감하여 가루로 변환 후 100개일시 아비도스로 변환.
-        while self.posible_abidos < min(self.posible_common, self.posible_uncommon):
-            time.sleep(0.01)
+        while self.posible_abidos <= min(self.posible_common, self.posible_uncommon): #아비도스 재료와 일치될때까지
+            time.sleep(0.01)                            #0.01가 제일 안정적임
+            if self.posible_abidos >= min(self.posible_common, self.posible_uncommon): #아비도스 재료가 더 많거나 같으면 중단 선언.
+                self.calcIntegrity = False
             os.system("cls")
             print("아비도스로 변환 시뮬레이션중...")
-            self.common -= 86
-            self.uncommon -= 45
-            self.sequnce_common += 86
-            self.sequnce_uncommon += 45
-            if self.sequnce_common > 100:
-                self.sequnce_common - 100
+            if self.calcIntegrity == True:
+                self.common -= self.need_common         #need Common    86
+                self.sequnce_common += self.need_common
+                self.uncommon -= self.need_uncommon     #need Uncommon  45
+                self.sequnce_uncommon += self.need_uncommon
+            else:
+                break
+            if self.sequnce_common >= 100:              #Sequnce Common
+                self.sequnce_common -= 100
+                self.common += self.sequnce_common
+                self.sequnce_common = 0
                 self.dust += 80
                 self.probeComToDust2 += 1
-            if self.sequnce_uncommon > 50:
-                self.sequnce_uncommon - 50
+            if self.sequnce_uncommon >= 50:             #Sequnce Uncommon
+                self.sequnce_uncommon -= 50
+                self.uncommon += self.sequnce_uncommon
+                self.sequnce_uncommon = 0
                 self.dust += 80
                 self.probeUncomToDust += 1
             if self.dust > 100:
-                self.calc3("실시간으로 모든 생활가루를 아비도스 재료로 변환중...", False)
+                self.calc3(None, False)
                 self.probeAbidos += 1
             self.showData()
             self.probeResultDust = self.dust
         return
-    
+
     def result(self):
         self.probeDust2 = self.probeComToDust2 * 86
         self.probeDust3 = self.probeUncomToDust * 45
@@ -169,8 +180,8 @@ class AbidosCalc:
 
 
 calc = AbidosCalc()
-current_date = datetime.datetime.now().strftime("%Y%m%d")
-file_name = f"CalculatorSave_{current_date}.txt"
+current_date = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+file_name = f"saved_{current_date}.txt"
 results_folder = "Results"
 file_path = os.path.join(results_folder, file_name)
 

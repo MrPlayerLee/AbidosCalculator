@@ -1,2 +1,4 @@
 @echo off
-python buildtool.py py2exe
+pyinstaller --icon=Icon\Icon.ico --onefile AbidosCalculator.py
+python sub_data_build.py
+pause
